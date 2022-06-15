@@ -9,23 +9,21 @@ var searchCityForm = $("#searchCityForm");
 var searchedCities = $("#searchedCityLi");
 
 var getCityWeather = function (searchCityName){
-    var apiUrl = dailyWeatherApiStarts + searchCityName + "&" + personalAPIKey + "&" + unit;
-    fetch(apiUrl).then (function (response) {
+    var apiUrl = dailyWeatherAPIStarts + searchCityName + "&" + personalAPIKey + "&" + unit;
+    fetch(apiUrl).then (async function (response) {
         if (response.ok) {
-            return response.json().then(function (response) {
-                $(#cityName).html(response.name);
-                var unixTime = response.dt;
-                var date = moment.unix(unixTime).format("MM/DD/YY");
-                $("#currentdate").html(date);
-                var weatherIncoUrl = "http//openweathermap.org/img/wn/" + response.weather[0].icon + "@2x.png";
-                $("#weatherIconToday").attr("src", weatherInoUrl);
-                $("#tempToday").html(response.main.temp + "\u00B0f");
-                $("#humidityToday").html(response.main.humidity + "%");
-                $("#windSpeedToday").html(response.wind.speed + "MPH");
-
-                var lat = response.coord.lat;
-                var lon = response.coord.lon;
-            });
+            const response_1 = await response.json();
+            $("#cityName").html(response_1.name);
+            var unixTime = response_1.dt;
+            var date = moment.unix(unixTime).format("MM/DD/YY");
+            $("#currentdate").html(date);
+            var weatherIncoUrl = "http//openweathermap.org/img/wn/" + response_1.weather[0].icon + "@2x.png";
+            $("#weatherIconToday").attr("src", weatherInoUrl);
+            $("#tempToday").html(response_1.main.temp + "\u00B0f");
+            $("#humidityToday").html(response_1.main.humidity + "%");
+            $("#windSpeedToday").html(response_1.wind.speed + "MPH");
+            var lat = response_1.coord.lat;
+            var lon = response_1.coord.lon;
 
         }else {
             alert("Please provide a valid city name.")
@@ -37,7 +35,7 @@ var getUVIndex = function (lat, lon) {
     var apiUrl =
     dailyUVIndexAPIStarts + personalAPIKey + "&lat=" + lat + "&lon=" + lon + "&" + unit;
     fetch(apiUrl).then (function (response) {
-        return response.json():
+        return response.json();
     })
     .then(function(response){
         $("#UVIndexToday").removeClass();
@@ -62,11 +60,58 @@ var getForecast = function (lat, lon) {
             var weatherIncoUrl = "http//openweathermap.org/img/wn/" + response.daily [i].weather[0].icon + "@2x.png";
             $("#weatherIconDay" + i).html(temp);
             var temp = response.daily[i].temp.day + " \U00B0F";
-            $("#tempDay" + i).html.(temp);
+            $("#tempDay" + i).html(temp);
             var humidity = response.daily[i].humidity;
             $("#humidityDay" + i).html(humidity + "%");
 
         }  
      });
 };
+
+var createBtn = function (btnText) {
+    var btn = $("<button>")
+    .text(btnText)
+    .addClass("list-group-item list-group-item-action")
+    .attr("type", "submit");
+    return btn;
+}
+
+var loadSavedCity = function(){
+    citiesListArr = JSON.parse(localStorage.getItem("weatherInfo"));
+    if (citiesListArr == null) {
+        citiesListArr = [];
+    }
+    for (var i=0; i < citiesListArr.length; i++) {
+        var cityNameBtn = createBtn(citiesListArr[i]);
+        searchedCities.append(cityNameBtn);
+    }
+};
+
+var saveCityName = function (searchCityName) {
+    var newCity = 0;
+    citiesListArr = JSON.parse(localStorage.getItem("weatherInfo"));
+    if (citiesListArr == null) {
+        citiesListArr = [];
+        citiesListArr.unshift(searchCityName);
+    } else {
+        for (var i=0; i < citiesListArr.length; i++) {
+            if (searchCityName.toLowerCase() ==citiesListArr[i].tolowercase()) {
+                return newCity;
+            }
+        }
+        if(citiesListArr.length = numOfCities) {
+            citiesListArr.unshift(searchCityName);
+        }
+    }
+    localStorage.setItem("weatherInfo", JSON.stringify(citiesListArr));
+    newCity = 1;
+    return newCity;
+};
+
+var createCityNameBtn = function (searchCityName) {
+    var saveCities = JSON.parse(localStorage.getItem("weatherInfo"));
+    if (saveCities.length == 1) {
+        var cityNameBtn = createBtn(searchCityName);
+    }
+}
 
